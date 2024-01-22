@@ -1,67 +1,75 @@
 package su.wrath;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MsgInterpreter {
 
-    public static void intepret(Message msg) {
-        StringBuilder result = new StringBuilder();
+    static String decode(Message msg) {
 
-        result
-                .append(prefixMeans(msg.getMsgPrefix()))
-                .append("c номером ").append(msg.getTransportNumber()).append(" ")
-                .append(categoryMeans(msg.getCategory()))
-                .append(reviewMeans(msg.getReview()));
-
-        System.out.println(result);
+        return String.format("%sc номером %s %s%s",
+                prefixMeans(msg.getMsgPrefix()),
+                msg.getTransportNumber(),
+                categoryMeans(msg.getCategory()),
+                reviewMeans(msg.getReview()));
     }
 
-    private static String prefixMeans(String input) {
+    static String prefixMeans(String input) {
         switch (input.toUpperCase()) {
             case "MTA":
-                return "Московский Транспорт Автобус ";
+                return "Московский городской автобус ";
             case "MTT":
-                return "Московский Транспорт Такси ";
+                return "Московское городское такси ";
             default:
                 return "Транспорт не определен!";
         }
     }
 
-    private static String categoryMeans(int input) {
+    static String categoryMeans(int input) {
         switch (input) {
             case 1:
                 return "за безопасность движения ";
             case 2:
                 return "за поведение кондуктора/водителя ";
             case 3:
-                return "за нарушение расписания ";
+                return "за соблюдение расписания ";
             case 4:
                 return "за техническое состояние ";
             case 5:
                 return "за оплату проезда ";
             default:
-                return "Ошибка Опредения Категории Оценки!";
+                return "Ошибка в категории оценки!";
         }
     }
 
-    private static String reviewMeans(int input) {
+    static String reviewMeans(int input) {
         switch (input) {
             case 1:
-                return "получил очень плохо";
+                return "получил оценку не приемлемо";
             case 2:
-                return "получил плохо";
+                return "получил оценку плохо";
             case 3:
-                return "получил удовлетворительно";
+                return "получил оценку удовлетворительно";
             case 4:
-                return "получил хорошо";
+                return "получил оценку хорошо";
             case 5:
-                return "получил отлично";
+                return "получил оценку отлично";
             default:
-                return "Ошибка Определения Оценки!";
+                return "Ошибка в оценке!";
         }
     }
 
-    public static void main(String[] args) {
-        Message msg = new Message("mta", "ав141х", 3, 3);
-        intepret(msg);
-    }
+    static String processResult(ParsingResult result) {
 
+        if (result.isValid()) {
+            return result.getMessage()
+                    .map(MsgInterpreter::decode)
+                    .orElse("Ошибка в формировании сообщения!");
+        } else {
+            return "Обработка прошла с ошибкой! Код ошибки: "
+                    + result.getErrorCode()
+                    + ", значение: "
+                    + result.getErrorDescription();
+        }
+    }
 }

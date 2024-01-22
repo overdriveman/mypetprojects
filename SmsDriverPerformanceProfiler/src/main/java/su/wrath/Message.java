@@ -17,14 +17,13 @@ public class Message {
     private int category;
     private int review;
 
-    public static class MessageBuilder { //Подсказываем ломбоку наши хотелки по поводу категории и ревью
+    public static class MessageBuilder {
         public MessageBuilder category(String category) {
             try {
                 this.category = Integer.parseInt(category);
             } catch (NumberFormatException ex) {
-                //Переделал надо запросить одобрения
                 String errorBuf = "Building message with category: " + "'" + category + "'" + "with exception:";
-                log.error(errorBuf, ex); // неугадал, есть отдельный метод  void error(String var1, Throwable var2);, надо было через него. Нашли мы по заныриванию в сам класс
+                log.error(errorBuf, ex);
                 this.category = -1;
             }
             return this;

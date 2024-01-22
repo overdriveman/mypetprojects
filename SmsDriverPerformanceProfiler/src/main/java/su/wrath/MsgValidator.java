@@ -4,20 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import static su.wrath.Constants.*;
 
-
-/**
- * Цель класса - проверка входных данных на валидность
- * Главный метод - validateInput("input").
- * Рузльтат работы - ErrorMessage
- * Класс для внутреннего использования - не предназначен для внешнего API
- */
 @Slf4j
 public class MsgValidator {
+
     private final static String[] EMPTY_STRING = {" "};
 
     protected static ErrorMessage validateInput(String input) {
-        ErrorMessage errorCode = checkInputFormat(input); //1;
+        ErrorMessage errorCode = checkInputFormat(input);
         String[] tokens = tokenize(input, errorCode);
+
         if (tokens.length == 4) {
             errorCode = tokenChecker(errorCode, tokens[0], MSG_PREFIX_PATTERN, ErrorMessage.WRONG_PREFIX);
             errorCode = tokenChecker(errorCode, tokens[1], MSG_TRANSPORT_NUM_PATTERN, ErrorMessage.WRONG_TRANSPORT_NUMBER);
@@ -28,7 +23,7 @@ public class MsgValidator {
         } else if (errorCode != ErrorMessage.SUCCESS) {
             return errorCode;
         }
-        log.warn("{}: '{}'", ErrorMessage.WRONG_ARGUMENTS.description, input); //2
+        log.warn("{}: '{}'", ErrorMessage.WRONG_ARGUMENTS.description, input);
         return ErrorMessage.WRONG_ARGUMENTS;
     }
 
@@ -53,7 +48,7 @@ public class MsgValidator {
         }
     }
 
-    protected static ErrorMessage checkPrefix(String input, ErrorMessage errorCode) { //Обратить внимание - стало ли лушче? Я затрудняюсь ответить.
+    protected static ErrorMessage checkPrefix(String input, ErrorMessage errorCode) {
         if (errorCode == ErrorMessage.SUCCESS) {
             if (checkTokenWithPattern(input, MSG_PREFIX_PATTERN)) {
                 return ErrorMessage.SUCCESS;
@@ -114,7 +109,6 @@ public class MsgValidator {
         }
     }
 
-    //внизу, потому-что играемся пока тут с этим делом, когда уберем избыточные методы - отрефакторим
     protected static ErrorMessage tokenChecker(ErrorMessage errorCode, String token, String pattern, ErrorMessage tokenError) {
         if (errorCode == ErrorMessage.SUCCESS) {
             if (checkTokenWithPattern(token, pattern)) {
