@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org" lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Список всех студентов</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+
+<body>
+<div class="card mb-3" style="width: 42rem;">
+    <div class="card-body">
+
+        <div th:switch="${students}">
+            <h2 th:case="null">Студентов пока нет в базе!</h2>
+            <div th:case="*">
+                <div th:insert="~{fragments/form-fragments.html :: display-table}"></div>
+            </div>
+            <div class="text-center">
+                <p><a href="/add-student" class="btn btn-success">Добавить нового студента</a></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

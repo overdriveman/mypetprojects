@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org" lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>Изменить студента</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+
+<body>
+
+<div class="card border-warning mb-3" style="width: 42rem;">
+    <div class="card-body">
+
+        <div class="container text-center mt-5">
+            <h2>Изменить студента</h2>
+        </div>
+
+        <div th:switch="${student}">
+            <div th:case="null">
+                <div th:if="${errorMessage}" class="container text-center text-bg-danger mt-5 ">
+                    <div th:text="${errorMessage}"></div>
+                </div>
+                <div class="container text-center mt-5">
+                    <a href="/students-list" class="btn btn-warning">На главную</a>
+                </div>
+            </div>
+            <div th:case="*">
+                <form action="#"
+                      th:action="@{/edit/{id}(id=${student.id})}"
+                      th:object="${student}"
+                      method="post">
+
+                    <div th:insert="~{fragments/form-fragments.html :: input-group}"></div>
+
+                    <div th:insert="~{fragments/error-report}"></div>
+
+                    <div class="container text-center mt-5">
+                        <input type="submit" value="Изменить студента" class="btn btn-success">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

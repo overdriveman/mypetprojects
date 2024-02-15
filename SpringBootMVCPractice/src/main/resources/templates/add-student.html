@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org" lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>Добавление нового студента</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+
+
+<body>
+<form action="#" th:action="@{/add-student}" th:object="${student}" method="post">
+
+    <div class="card border-success mb-3" style="width: 42rem;">
+        <div class="card-body">
+
+
+            <div class="container text-center mt-5">
+                <h2>Добавление нового студента</h2>
+            </div>
+
+            <div th:insert="~{fragments/form-fragments.html :: input-group}"></div>
+
+            <div th:insert="~{fragments/error-report}"></div>
+
+            <div class="container text-center mt-5">
+                <input type="submit" value="Добавить студента" class="btn btn-success">
+            </div>
+
+        </div>
+    </div>
+</form>
+</body>
+</html>

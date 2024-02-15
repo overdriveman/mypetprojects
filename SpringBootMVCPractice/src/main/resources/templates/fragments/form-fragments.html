@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org" lang="ru">
+
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+
+<div th:fragment="input-group">
+    <div class="input-group-lg flex-nowrap mb-3">
+
+        <label class="form-label">Имя</label>
+        <input type="text" th:field="*{name}" class="form-control" placeholder="Руслан Иванов">
+        <p th:if="${#fields.hasErrors('name')}" th:errorclass="error" th:errors="*{name}"></p>
+
+        <label class="form-label">Email</label>
+        <input type="text" th:field="*{email}" class="form-control" placeholder="rivanov@mail.ru">
+        <p th:if="${#fields.hasErrors('email')}" th:errorclass="error" th:errors="*{email}"></p>
+
+        <label class="form-label">Возраст</label>
+        <input type="number" th:field="*{age}" class="form-control" placeholder="33">
+        <p th:if="${#fields.hasErrors('age')}" th:errorclass="error" th:errors="*{age}"></p>
+
+        <label class="form-label">Город проживания</label>
+        <input type="text" th:field="*{hometown}" class="form-control" placeholder="Кинешма">
+        <p th:if="${#fields.hasErrors('hometown')}" th:errorclass="error" th:errors="*{hometown}"></p>
+
+    </div>
+</div>
+
+<div th:fragment="display-table">
+    <div class="text-center">
+
+        <h2>Студенты</h2>
+
+        <table class="table" style="width: 40rem;">
+            <thead>
+            <tr>
+                <th class="align-middle">ID</th>
+                <th class="align-middle">Имя</th>
+                <th class="align-middle">Email</th>
+                <th class="align-middle">Возраст</th>
+                <th class="align-middle">Город проживания</th>
+                <th class="align-middle">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student : ${students}">
+
+                <td th:text="${student.id}" class="align-middle"></td>
+                <td th:text="${student.name}" class="align-middle"></td>
+                <td th:text="${student.email}" class="align-middle"></td>
+                <td th:text="${student.age}" class="align-middle"></td>
+                <td th:text="${student.hometown}" class="align-middle"></td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a th:href="@{/edit/{id}(id=${student.id})}"
+                           class="btn btn-warning align-middle">Изм.</a>
+                        <a th:href="@{|/delete/${student.id}|}"
+                           class="btn btn-danger align-middle">Уд.</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
