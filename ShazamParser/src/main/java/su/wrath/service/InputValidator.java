@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 
 import static su.wrath.config.ShazamFileConstants.*;
+import static su.wrath.config.DateConstants.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +19,8 @@ public class InputValidator {
         if (checkInputFile(cmd)) {
             return checkOutputFileNotPresent(cmd) &&
                     checkXmlFileNotPresent(cmd) &&
-                    checkJsonFileNotPresent(cmd);
+                    checkJsonFileNotPresent(cmd) &&
+                    checkFilterDate(cmd);
         }
 
         return false;
@@ -65,6 +67,20 @@ public class InputValidator {
         }
 
         return getInputFileName(cmd).isPresent();
+    }
+
+    private boolean checkFilterDate(CommandLine cmd) {
+        if (cmd.hasOption("filter-date-after")) {
+            String inputDate = cmd.getOptionValue("filter-date-after");
+            if (inputDate.matches(DAY_FIRST_REGEX) ||
+                    inputDate.matches(YEAR_FIRST_REGEX)) {
+                return true;
+            } else{
+                log.error("Неверно указан формат даты: '{}'", inputDate);
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean checkIfInputFileIsShazam(Path path) {

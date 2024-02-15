@@ -21,15 +21,7 @@ public class TextFormatter extends PlainTextFormatter {
         try (FileWriter fileWriter = new FileWriter(outputFile);
             PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
-            if (template.outputColumns == 3) {
-                printWriter.printf(template.formatString, "Artist", "Track", "date");
-                tracks.forEach(t -> printWriter.printf(String.format(template.formatString, t.getArtist(), t.getTitle(), t.getDate())));
-            } else if (template.outputColumns == 2) {
-                printWriter.printf(template.formatString, "Artist", "Track");
-                tracks.forEach(t -> printWriter.printf(String.format(template.formatString, t.getArtist(), t.getTitle())));
-            } else {
-                log.error("Невозможно вывести в файл шаблон с номером столбцов: '{}'", template.outputColumns);
-            }
+            printFormattedTracks(tracks, printWriter, template);
 
         } catch (IOException e) {
             log.error("Ошибка при записи в файл: ", e);

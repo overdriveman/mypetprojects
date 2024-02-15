@@ -1,6 +1,7 @@
 package su.wrath.formatter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
@@ -13,7 +14,7 @@ import java.util.List;
 @Slf4j
 public class JsonFormatter implements Formatter {
 
-    private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule()).enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
     public void format(List<MusicTrack> tracks, CommandLine cmd) {

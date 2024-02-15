@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static su.wrath.TestHelpers.getPathToTestFile;
 import static su.wrath.TestHelpers.prepareCommandLine;
 
@@ -121,5 +123,57 @@ public class InputValidatorTest {
         cmd = prepareCommandLine("-df", "-j", filePath.toString(), "jout", "-x", "xout", "-t", "tout");
         assertFalse(inputValidator.validateInputArgs(cmd), "Входной файл не может быть указан вместо выходного как ключ");
 
+    }
+
+    //возвращает тру на нормальные даты с разными разделителями (6 вариантов)
+    //возвращает фалс на подправленные даты с разными разделителями
+    //"[dd['/']['-']['.']MM['/']['-']['.']uuuu][uuuu['/']['-']['.']dd['/']['-']['.']MM]"
+    @Test
+    public void checkInputValidatorWithFilterDateOptionAndValidDate() {
+        Path filePath = getPathToTestFile("ShazTestInput.csv");
+
+        CommandLine cmd = prepareCommandLine("-p", "24.01.2024", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "24.01.2024 - валидная дата");
+
+        cmd = prepareCommandLine("-p", "24/01/2024", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "24/01/2024 - валидная дата");
+
+        cmd = prepareCommandLine("-p", "24-01-2024", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "24-01-2024 - валидная дата");
+
+        cmd = prepareCommandLine("-p", "2024.24.01", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "2024.24.01 - валидная дата");
+
+        cmd = prepareCommandLine("-p", "2024/24/01", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "2024/24/01 - валидная дата");
+
+        cmd = prepareCommandLine("-p", "2024-24-01", filePath.toString());
+        assertTrue(inputValidator.validateInputArgs(cmd), "2024-24-01 - валидная дата");
+    }
+
+    @Test
+    public void checkInputValidatorWithFilterDateOptionAndNotValidDate() {
+        Path filePath = getPathToTestFile("ShazTestInput.csv");
+
+        CommandLine cmd = prepareCommandLine("-p", "34.01.2024", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "34.01.2024 - день указан не верно!");
+
+        cmd = prepareCommandLine("-p", "24/101/2024", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "24/101/2024 - месяц указан не верно!");
+
+        cmd = prepareCommandLine("-p", "24-1-2024", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "24-1-2024 - месяц указан не верно!");
+
+        cmd = prepareCommandLine("-p", "2024.4.01", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "2024.4.01 - день указан не верно!");
+
+        cmd = prepareCommandLine("-p", "2024/24/1", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "2024/24/1 -месяц указан не верно!");
+
+        cmd = prepareCommandLine("-p", "2024-00-01", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "2024-00-01 - день указан не верно!");
+
+        cmd = prepareCommandLine("-p", "2024-01-00", filePath.toString());
+        assertFalse(inputValidator.validateInputArgs(cmd), "2024-01-00 - месяц указан не верно!");
     }
 }

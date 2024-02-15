@@ -32,6 +32,14 @@ public class ShazamCliOptions {
                 .desc("write output to file")
                 .build());
 
+        options.addOption(Option.builder("p")
+                .longOpt("filter-date-after")
+                .hasArg(true)
+                .argName("filterDate")
+                .optionalArg(false)
+                .desc("process only tracks added after desired date")
+                .build());
+
         options.addOption(new Option("d", "date", false, "add date to console output"));
         options.addOption(new Option("f", "format", false, "format the output"));
         options.addOption(new Option("h", "help", false, "print help message"));

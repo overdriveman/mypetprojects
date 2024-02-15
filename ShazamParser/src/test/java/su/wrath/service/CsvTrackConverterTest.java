@@ -4,8 +4,10 @@ import org.apache.commons.cli.*;
 import org.junit.jupiter.api.Test;
 import su.wrath.bean.MusicTrack;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +19,12 @@ public class CsvTrackConverterTest {
     CsvTrackConverter converter = new CsvTrackConverter();
 
     CommandLine cmdMock = mock(CommandLine.class);
+
+    MusicTrack fridayTrack = new MusicTrack(1, LocalDate.of(2024, 1, 12), "Title", "Artist");
+    MusicTrack mondayTrack = new MusicTrack(1, LocalDate.of(2024, 1, 8), "Title", "Artist");
+
+    MusicTrack februaryTrack = new MusicTrack(1, LocalDate.of(2024, 2, 29), "Title", "Artist");
+    MusicTrack marchTrack = new MusicTrack(1, LocalDate.of(2024, 3, 2), "Title", "Artist");
 
     @Test
     public void checkComparatorByArtist() {
@@ -170,5 +178,151 @@ public class CsvTrackConverterTest {
         CommandLine cmd = prepareCommandLine(getPathToTestFile("ShazTestInput.csv").toString());
 
         assertTrue(converter.parseInputFile("NonExistingFile", cmd).isEmpty(), "Метод parseInputFile возвращает пустой список из пустого файла");
+    }
+
+    @Test
+    public void getFilterWithoutOption() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(false);
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, never()).getOptionValue("filter-date-after");
+        assertTrue(predicate.test(fridayTrack));
+        assertTrue(predicate.test(mondayTrack));
+    }
+
+    @Test
+    public void getFilterWithFaultyDate() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("22.13.2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, times(1)).getOptionValue("filter-date-after");
+        assertFalse(predicate.test(fridayTrack), "getFilter with incorrect date is always false predicate");
+        assertFalse(predicate.test(mondayTrack), "getFilter with incorrect date is always false predicate");
+    }
+
+    @Test
+    public void getFilterWithNormalDateAndDotAsSeparator() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("10.01.2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, times(1)).getOptionValue("filter-date-after");
+        assertTrue(predicate.test(fridayTrack));
+        assertFalse(predicate.test(mondayTrack));
+    }
+
+    @Test
+    public void getFilterWithNormalDateAndSlashAsSeparator() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("2024/10/01");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, times(1)).getOptionValue("filter-date-after");
+        assertTrue(predicate.test(fridayTrack));
+        assertFalse(predicate.test(mondayTrack));
+    }
+
+    @Test
+    public void getFilterWithNormalDateAndDashAsSeparator() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("10-01-2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, times(1)).getOptionValue("filter-date-after");
+        assertTrue(predicate.test(fridayTrack));
+        assertFalse(predicate.test(mondayTrack));
+    }
+
+    @Test
+    public void getFilterWithNormalDateAndTrackBeforeThat() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("10-01-2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+        MusicTrack lateTrack = new MusicTrack(1, LocalDate.of(2024, 1, 9), "Title", "Artist");
+
+        assertNotNull(predicate);
+        verify(cmdMock, times(1)).hasOption("filter-date-after");
+        verify(cmdMock, times(1)).getOptionValue("filter-date-after");
+        assertFalse(predicate.test(lateTrack));
+        assertFalse(predicate.test(mondayTrack));
+    }
+
+    @Test
+    public void getFilterWith29thFebruaryOf2023rd() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("29-02-2023");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        MusicTrack february2023Track = new MusicTrack(1, LocalDate.of(2023, 2, 28), "title", "artist");
+
+        assertNotNull(predicate);
+        assertFalse(predicate.test(february2023Track), "Filter should return always false predicate on faulty date");
+        assertFalse(predicate.test(februaryTrack), "February 29 of 2024 is invalid and false");
+        assertFalse(predicate.test(marchTrack), "March track should not pass the filter");
+    }
+
+    @Test
+    public void getFilterWith29thFebruaryOf2024rd() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("29-02-2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        assertTrue(predicate.test(marchTrack), "Track with march date should pass");
+        assertFalse(predicate.test(februaryTrack), "Track with february date should be filtered");
+
+    }
+
+    @Test
+    public void getFilterWith30thFebruary() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("30-02-2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        assertFalse(predicate.test(februaryTrack), "Filter should return always false predicate on faulty date");
+        assertFalse(predicate.test(marchTrack), "March track should not pass the filter");
+    }
+
+    @Test
+    public void getFilterWith31thFebruary() {
+        reset(cmdMock);
+        when(cmdMock.hasOption("filter-date-after")).thenReturn(true);
+        when(cmdMock.getOptionValue("filter-date-after")).thenReturn("31-02-2024");
+
+        Predicate<MusicTrack> predicate = converter.getFilter(cmdMock);
+
+        assertNotNull(predicate);
+        assertFalse(predicate.test(februaryTrack), "Filter should return always false predicate on faulty date");
+        assertFalse(predicate.test(marchTrack), "Filter should return always false predicate on faulty date");
     }
 }

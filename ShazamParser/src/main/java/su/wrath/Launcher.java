@@ -55,8 +55,6 @@ public class Launcher {
             for (Formatter formatter : selector.chooseFormatters(cmd)) {
                 formatter.format(tracks, cmd);
             }
-        } else {
-            log.error("Аргументы заданы не верно!");
         }
     }
 
